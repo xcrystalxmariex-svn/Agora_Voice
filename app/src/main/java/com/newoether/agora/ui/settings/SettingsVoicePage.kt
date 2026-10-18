@@ -338,7 +338,7 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                                             Icon(
                                                 Icons.Default.UploadFile,
                                                 contentDescription = stringResource(
-                                                    R.string.voice_reference_pick,
+                                                    R.string.voice_reference_choose,
                                                 ),
                                             )
                                         }
@@ -353,7 +353,7 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                                                 Icon(
                                                     Icons.Default.Delete,
                                                     contentDescription = stringResource(
-                                                        R.string.voice_reference_clear,
+                                                        R.string.voice_reference_remove,
                                                     ),
                                                 )
                                             }
