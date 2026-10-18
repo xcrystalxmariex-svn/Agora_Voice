@@ -121,7 +121,7 @@ class VoiceController private constructor(private val appContext: Context) {
             .header("Accept", "application/json")
             .post(payload.toRequestBody(JSON_MEDIA_TYPE))
             .build()
-        client.newCall(request).execute().use { response ->
+        return client.newCall(request).execute().use { response ->
             val body = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
                 throw IllegalStateException("TTS endpoint error ${response.code}: ${body.take(300)}")
@@ -145,7 +145,7 @@ class VoiceController private constructor(private val appContext: Context) {
             .header("Authorization", "Bearer ${s.apiKey}")
             .post(payload.toRequestBody(JSON_MEDIA_TYPE))
             .build()
-        client.newCall(request).execute().use { response ->
+        return client.newCall(request).execute().use { response ->
             val bytes = response.body?.bytes()
             if (!response.isSuccessful || bytes == null) {
                 val snippet = response.body?.string().orEmpty().take(300)
@@ -192,20 +192,20 @@ class VoiceController private constructor(private val appContext: Context) {
 /** Strip markdown / code fences so spoken text sounds natural. */
 internal fun plainTextForSpeech(raw: String): String {
     var text = raw
-    // fenced code blocks (``` ... ```)
-    text = Regex("`{3}.*?`{3}", RegexOption.DOT_MATCHES_ALL).replace(text, " ")
-    // inline code and emphasis markers
+    // fenced code blocks
+    text = Regex("```[\\s\\S]*?```").replace(text, " ")
+    // inline code
     text = Regex("`([^`]*)`").replace(text, "$1")
     text = text.replace("**", "").replace("__", "")
     // markdown links [label](url) -> label
-    text = Regex("!?\[([^\]]*)\]\([^)]*\)").replace(text, "$1")
+    text = Regex("""!?\[([^\]]*)\]\([^)]*\)""").replace(text, "$1")
     // html tags
     text = Regex("<[^>]+>").replace(text, " ")
     // list markers and horizontal rules
-    text = Regex("(?m)^\s*[-*+]\s+").replace(text, "")
-    text = Regex("(?m)^\s*#+\s*").replace(text, "")
-    text = Regex("(?m)^-{3,}\s*$").replace(text, " ")
+    text = Regex("""(?m)^\s*[-*+]\s+""").replace(text, "")
+    text = Regex("""(?m)^\s*#+\s*""").replace(text, "")
+    text = Regex("""(?m)^-{3,}\s*$""").replace(text, " ")
     // collapse whitespace
-    text = Regex("\s+").replace(text, " ").trim()
+    text = Regex("""\s+""").replace(text, " ").trim()
     return text
 }

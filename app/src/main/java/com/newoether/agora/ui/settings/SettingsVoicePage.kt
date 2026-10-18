@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
@@ -43,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.newoether.agora.R
 import com.newoether.agora.data.VoiceSettings
@@ -65,8 +63,12 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
 
     val enabled by settings.voiceEnabled.collectAsState(initial = false)
     val autoSpeak by settings.voiceAutoSpeak.collectAsState(initial = false)
-    val endpointKind by settings.voiceEndpointKind.collectAsState(initial = VoiceSettings.ENDPOINT_KIND_MAGPIE)
-    val endpointUrl by settings.voiceEndpointUrl.collectAsState(initial = VoiceSettings.DEFAULT_MAGPIE_URL)
+    val endpointKind by settings.voiceEndpointKind.collectAsState(
+        initial = VoiceSettings.ENDPOINT_KIND_MAGPIE,
+    )
+    val endpointUrl by settings.voiceEndpointUrl.collectAsState(
+        initial = VoiceSettings.DEFAULT_MAGPIE_URL,
+    )
     val apiKey by settings.voiceApiKey.collectAsState(initial = "")
     val model by settings.voiceModel.collectAsState(initial = "magpie-tts-zeroshot")
     val referencePath by settings.voiceReferenceWavPath.collectAsState(initial = "")
@@ -76,7 +78,6 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
     var testing by remember { mutableStateOf(false) }
     var testOk by remember { mutableStateOf(false) }
 
-    // Keep the singleton controller in sync with the current configuration.
     LaunchedEffect(enabled, autoSpeak, endpointKind, endpointUrl, apiKey, model, referencePath) {
         controller.updateSettings(
             VoiceSettings(
@@ -87,14 +88,16 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                 model = model,
                 referenceWavPath = referencePath,
                 autoSpeak = autoSpeak,
-            )
+            ),
         )
     }
 
-    val pickWav = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    val pickWav = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent(),
+    ) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val dest = File(context.filesDir, "voice/reference.wav").apply { parentFile?.mkdirs() }
+            val dest = File(context.filesDir, "voice_reference.wav")
             withContext(Dispatchers.IO) {
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     dest.outputStream().use { input.copyTo(it) }
@@ -122,161 +125,245 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                 .fillMaxSize()
                 .padding(padding),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = 16.dp, vertical = 8.dp,
+                horizontal = 16.dp,
+                vertical = 8.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             item {
-                SettingsGroup(title = stringResource(R.string.settings_voice)) {
-                    SettingsItem(
-                        headlineContent = { Text(stringResource(R.string.voice_enable)) },
-                        supportingContent = { Text(stringResource(R.string.voice_enable_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = enabled,
-                                onCheckedChange = { scope.launch { settings.saveVoiceEnabled(it) } },
+                SettingsGroup(
+                    title = stringResource(R.string.settings_voice),
+                    items = listOf(
+                        {
+                            SettingsItem(
+                                headlineContent = {
+                                    Text(stringResource(R.string.voice_enable))
+                                },
+                                supportingContent = {
+                                    Text(stringResource(R.string.voice_enable_desc))
+                                },
+                                trailingContent = {
+                                    Switch(
+                                        checked = enabled,
+                                        onCheckedChange = {
+                                            scope.launch { settings.saveVoiceEnabled(it) }
+                                        },
+                                    )
+                                },
                             )
                         },
-                    )
-                    SettingsItem(
-                        headlineContent = { Text(stringResource(R.string.voice_auto_speak)) },
-                        supportingContent = { Text(stringResource(R.string.voice_auto_speak_desc)) },
-                        trailingContent = {
-                            Switch(
-                                checked = autoSpeak,
-                                onCheckedChange = { scope.launch { settings.saveVoiceAutoSpeak(it) } },
+                        {
+                            SettingsItem(
+                                headlineContent = {
+                                    Text(stringResource(R.string.voice_auto_speak))
+                                },
+                                supportingContent = {
+                                    Text(stringResource(R.string.voice_auto_speak_desc))
+                                },
+                                trailingContent = {
+                                    Switch(
+                                        checked = autoSpeak,
+                                        onCheckedChange = {
+                                            scope.launch { settings.saveVoiceAutoSpeak(it) }
+                                        },
+                                    )
+                                },
                             )
                         },
-                    )
-                }
+                    ),
+                )
             }
 
             item {
-                SettingsGroup(title = stringResource(R.string.voice_endpoint_group)) {
-                    SettingsItem(
-                        headlineContent = { Text(stringResource(R.string.voice_endpoint_kind)) },
-                        supportingContent = {
-                            Text(stringResource(R.string.voice_endpoint_kind_desc))
-                        },
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        FilterChip(
-                            selected = endpointKind == VoiceSettings.ENDPOINT_KIND_MAGPIE,
-                            onClick = {
-                                scope.launch {
-                                    settings.saveVoiceEndpointKind(VoiceSettings.ENDPOINT_KIND_MAGPIE)
-                                    settings.saveVoiceEndpointUrl(VoiceSettings.DEFAULT_MAGPIE_URL)
-                                }
-                            },
-                            label = { Text(stringResource(R.string.voice_kind_magpie)) },
-                        )
-                        FilterChip(
-                            selected = endpointKind == VoiceSettings.ENDPOINT_KIND_OPENAI,
-                            onClick = {
-                                scope.launch { settings.saveVoiceEndpointKind(VoiceSettings.ENDPOINT_KIND_OPENAI) }
-                            },
-                            label = { Text(stringResource(R.string.voice_kind_openai)) },
-                        )
-                    }
-                    SettingsItem(
-                        headlineContent = { Text(stringResource(R.string.voice_endpoint_url)) },
-                    )
-                    OutlinedTextField(
-                        value = endpointUrl,
-                        onValueChange = { scope.launch { settings.saveVoiceEndpointUrl(it) } },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        singleLine = true,
-                        placeholder = {
-                            Text(
-                                if (endpointKind == VoiceSettings.ENDPOINT_KIND_MAGPIE)
-                                    VoiceSettings.DEFAULT_MAGPIE_URL
-                                else
-                                    "https://api.openai.com/v1/audio/speech"
+                SettingsGroup(
+                    title = stringResource(R.string.voice_endpoint_group),
+                    items = buildList {
+                        add {
+                            SettingsItem(
+                                headlineContent = {
+                                    Text(stringResource(R.string.voice_endpoint_kind))
+                                },
+                                supportingContent = {
+                                    Text(stringResource(R.string.voice_endpoint_kind_desc))
+                                },
                             )
-                        },
-                    )
-                    SettingsItem(
-                        headlineContent = { Text(stringResource(R.string.voice_api_key)) },
-                        supportingContent = { Text(stringResource(R.string.voice_api_key_desc)) },
-                    )
-                    OutlinedTextField(
-                        value = apiKey,
-                        onValueChange = { scope.launch { settings.saveVoiceApiKey(it) } },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                    )
-                    if (endpointKind == VoiceSettings.ENDPOINT_KIND_OPENAI) {
-                        SettingsItem(
-                            headlineContent = { Text(stringResource(R.string.voice_model)) },
-                        )
-                        OutlinedTextField(
-                            value = model,
-                            onValueChange = { scope.launch { settings.saveVoiceModel(it) } },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            singleLine = true,
-                            placeholder = { Text("tts-1") },
-                        )
-                    }
-                }
-            }
-
-            item {
-                SettingsGroup(title = stringResource(R.string.voice_reference_group)) {
-                    val hasRef = referencePath.isNotBlank() && File(referencePath).exists()
-                    SettingsItem(
-                        headlineContent = {
-                            Text(
-                                if (hasRef) File(referencePath).name
-                                else stringResource(R.string.voice_reference_none)
-                            )
-                        },
-                        supportingContent = {
-                            Text(
-                                if (hasRef) stringResource(R.string.voice_reference_set_desc)
-                                else stringResource(R.string.voice_reference_desc)
-                            )
-                        },
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                                contentDescription = null,
-                            )
-                        },
-                        trailingContent = {
-                            Row {
-                                IconButton(onClick = { pickWav.launch("audio/wav") }) {
-                                    Icon(
-                                        imageVector = Icons.Default.UploadFile,
-                                        contentDescription = stringResource(R.string.voice_reference_choose),
+                        }
+                        add {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                FilterChip(
+                                    selected =
+                                        endpointKind == VoiceSettings.ENDPOINT_KIND_MAGPIE,
+                                    onClick = {
+                                        scope.launch {
+                                            settings.saveVoiceEndpointKind(
+                                                VoiceSettings.ENDPOINT_KIND_MAGPIE,
+                                            )
+                                            settings.saveVoiceEndpointUrl(
+                                                VoiceSettings.DEFAULT_MAGPIE_URL,
+                                            )
+                                        }
+                                    },
+                                    label = {
+                                        Text(stringResource(R.string.voice_kind_magpie))
+                                    },
+                                )
+                                FilterChip(
+                                    selected =
+                                        endpointKind == VoiceSettings.ENDPOINT_KIND_OPENAI,
+                                    onClick = {
+                                        scope.launch {
+                                            settings.saveVoiceEndpointKind(
+                                                VoiceSettings.ENDPOINT_KIND_OPENAI,
+                                            )
+                                        }
+                                    },
+                                    label = {
+                                        Text(stringResource(R.string.voice_kind_openai))
+                                    },
+                                )
+                            }
+                        }
+                        add {
+                            Column(Modifier.fillMaxWidth()) {
+                                SettingsItem(
+                                    headlineContent = {
+                                        Text(stringResource(R.string.voice_endpoint_url))
+                                    },
+                                )
+                                OutlinedTextField(
+                                    value = endpointUrl,
+                                    onValueChange = {
+                                        scope.launch { settings.saveVoiceEndpointUrl(it) }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    singleLine = true,
+                                    placeholder = {
+                                        Text(
+                                            if (endpointKind ==
+                                                VoiceSettings.ENDPOINT_KIND_MAGPIE
+                                            ) {
+                                                VoiceSettings.DEFAULT_MAGPIE_URL
+                                            } else {
+                                                "https://api.openai.com/v1/audio/speech"
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                        add {
+                            Column(Modifier.fillMaxWidth()) {
+                                SettingsItem(
+                                    headlineContent = {
+                                        Text(stringResource(R.string.voice_api_key))
+                                    },
+                                    supportingContent = {
+                                        Text(stringResource(R.string.voice_api_key_desc))
+                                    },
+                                )
+                                OutlinedTextField(
+                                    value = apiKey,
+                                    onValueChange = {
+                                        scope.launch { settings.saveVoiceApiKey(it) }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    singleLine = true,
+                                    visualTransformation = PasswordVisualTransformation(),
+                                )
+                            }
+                        }
+                        if (endpointKind == VoiceSettings.ENDPOINT_KIND_OPENAI) {
+                            add {
+                                Column(Modifier.fillMaxWidth()) {
+                                    SettingsItem(
+                                        headlineContent = {
+                                            Text(stringResource(R.string.voice_model))
+                                        },
+                                    )
+                                    OutlinedTextField(
+                                        value = model,
+                                        onValueChange = {
+                                            scope.launch { settings.saveVoiceModel(it) }
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                                        singleLine = true,
+                                        placeholder = { Text("tts-1") },
                                     )
                                 }
-                                if (hasRef) {
-                                    IconButton(onClick = {
-                                        File(referencePath).delete()
-                                        scope.launch { settings.saveVoiceReferenceWavPath("") }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = stringResource(R.string.voice_reference_remove),
-                                        )
-                                    }
-                                }
                             }
+                        }
+                    },
+                )
+            }
+
+            item {
+                val hasRef = referencePath.isNotBlank() && File(referencePath).exists()
+                SettingsGroup(
+                    title = stringResource(R.string.voice_reference_group),
+                    items = listOf(
+                        {
+                            SettingsItem(
+                                headlineContent = {
+                                    Text(
+                                        if (hasRef) {
+                                            File(referencePath).name
+                                        } else {
+                                            stringResource(R.string.voice_reference_none)
+                                        },
+                                    )
+                                },
+                                supportingContent = {
+                                    Text(
+                                        if (hasRef) {
+                                            stringResource(R.string.voice_reference_set_desc)
+                                        } else {
+                                            stringResource(R.string.voice_reference_desc)
+                                        },
+                                    )
+                                },
+                                trailingContent = {
+                                    Row {
+                                        IconButton(onClick = { pickWav.launch("audio/*") }) {
+                                            Icon(
+                                                Icons.Default.UploadFile,
+                                                contentDescription = stringResource(
+                                                    R.string.voice_reference_pick,
+                                                ),
+                                            )
+                                        }
+                                        if (hasRef) {
+                                            IconButton(
+                                                onClick = {
+                                                    scope.launch {
+                                                        settings.saveVoiceReferenceWavPath("")
+                                                    }
+                                                },
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = stringResource(
+                                                        R.string.voice_reference_clear,
+                                                    ),
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                            )
                         },
-                    )
-                }
+                    ),
+                )
             }
 
             item {
@@ -292,7 +379,10 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                             testOk = false
                             scope.launch {
                                 try {
-                                    controller.speak("__voice_test__", "Hello! This is a test of the voice settings.")
+                                    controller.speak(
+                                        "__voice_test__",
+                                        "Hello! This is a test of the voice settings.",
+                                    )
                                     testOk = true
                                 } finally {
                                     testing = false
@@ -300,7 +390,10 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                             }
                         },
                         enabled = !testing && enabled && apiKey.isNotBlank() &&
-                            (endpointKind != VoiceSettings.ENDPOINT_KIND_MAGPIE || referencePath.isNotBlank()),
+                            (
+                                endpointKind != VoiceSettings.ENDPOINT_KIND_MAGPIE ||
+                                    referencePath.isNotBlank()
+                                ),
                     ) {
                         if (testing) {
                             CircularProgressIndicator(
