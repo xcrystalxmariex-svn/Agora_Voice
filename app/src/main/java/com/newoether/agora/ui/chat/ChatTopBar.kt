@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
@@ -103,6 +104,8 @@ internal fun ChatTopBar(
     moreMenuContent: (@Composable ColumnScope.(dismiss: () -> Unit) -> Unit)? = null,
 ) {
     var moreMenuOpen by remember { mutableStateOf(false) }
+    var voiceProfileDialogOpen by remember { mutableStateOf(false) }
+    val voiceProfileChatId = currentConversationId?.takeIf { !isNewChatMode }
     val allowSpatialTransitions = LocalAgoraMotionPolicy.current.allowSpatialTransitions
     val searchFocusRequester = remember { FocusRequester() }
     LaunchedEffect(searchActive) {
@@ -506,6 +509,17 @@ internal fun ChatTopBar(
                                         onShareConversation()
                                     },
                                 )
+                                AgoraDropdownMenuItem(
+                                    text = { Text("Voice for this chat") },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.RecordVoiceOver, contentDescription = null)
+                                    },
+                                    enabled = voiceProfileChatId != null,
+                                    onClick = {
+                                        moreMenuOpen = false
+                                        voiceProfileDialogOpen = true
+                                    },
+                                )
                                 }
                             }
                         }
@@ -516,6 +530,12 @@ internal fun ChatTopBar(
                 }
             }
         }
+    }
+    if (voiceProfileDialogOpen && voiceProfileChatId != null) {
+        ChatVoiceProfileDialog(
+            chatId = voiceProfileChatId,
+            onDismiss = { voiceProfileDialogOpen = false },
+        )
     }
 }
 
