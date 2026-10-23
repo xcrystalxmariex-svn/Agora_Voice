@@ -63,8 +63,12 @@ class VoiceController private constructor(private val appContext: Context) {
         settings = value
     }
 
-    fun speak(messageId: String, rawText: String) {
-        val s = settings
+    /**
+     * Speaks [rawText]. [override] (e.g. the chat's resolved voice profile) wins over the
+     * snapshot last pushed with [updateSettings].
+     */
+    fun speak(messageId: String, rawText: String, override: VoiceSettings? = null) {
+        val s = override ?: settings
         if (!s.isConfigured() || rawText.isBlank()) return
         stop()
         _lastError.value = null

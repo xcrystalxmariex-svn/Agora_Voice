@@ -424,6 +424,12 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
                     }
                 }
             }
+
+            // Saved voice profiles: the default profile (or a chat's own pick) overrides the
+            // endpoint above; with no profiles saved, chats keep using the settings above.
+            item {
+                SettingsVoiceProfilesSection()
+            }
         }
     }
 }

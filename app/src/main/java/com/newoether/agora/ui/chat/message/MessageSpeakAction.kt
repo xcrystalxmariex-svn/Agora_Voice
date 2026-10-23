@@ -41,11 +41,12 @@ fun AssistantSpeakAction(
     val controller = remember { VoiceController.get(context) }
     val enabled by viewModel.settings.voiceEnabled.collectAsState(initial = false)
     if (!enabled) return
+    val voiceSettings = rememberChatVoiceSettings(viewModel)
     val playingId by controller.playingMessageId.collectAsState()
     val playingThis = playingId == messageId
     IconButton(
         onClick = {
-            if (playingThis) controller.stop() else controller.speak(messageId, text)
+            if (playingThis) controller.stop() else controller.speak(messageId, text, voiceSettings)
         },
         modifier = modifier.size(32.dp),
     ) {
@@ -75,6 +76,7 @@ fun VoiceAutoSpeakEffect(
     val controller = remember { VoiceController.get(context) }
     val enabled by viewModel.settings.voiceEnabled.collectAsState(initial = false)
     val autoSpeak by viewModel.settings.voiceAutoSpeak.collectAsState(initial = false)
+    val voiceSettings = rememberChatVoiceSettings(viewModel)
     var lastSpokenId by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(latestAssistantMessageId, isStreaming) {
         if (enabled && autoSpeak && !isStreaming &&
@@ -83,7 +85,7 @@ fun VoiceAutoSpeakEffect(
             latestAssistantMessageId != lastSpokenId
         ) {
             lastSpokenId = latestAssistantMessageId
-            controller.speak(latestAssistantMessageId, latestAssistantText)
+            controller.speak(latestAssistantMessageId, latestAssistantText, voiceSettings)
         }
     }
 }
