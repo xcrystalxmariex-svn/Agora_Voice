@@ -47,6 +47,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.newoether.agora.R
 import com.newoether.agora.data.VoiceProfile
+import com.newoether.agora.data.repository.deleteVoiceProfile
+import com.newoether.agora.data.repository.saveVoiceActiveProfileId
+import com.newoether.agora.data.repository.saveVoiceApiKey
+import com.newoether.agora.data.repository.saveVoiceAutoSpeak
+import com.newoether.agora.data.repository.saveVoiceEnabled
+import com.newoether.agora.data.repository.saveVoiceEndpointKind
+import com.newoether.agora.data.repository.saveVoiceEndpointUrl
+import com.newoether.agora.data.repository.saveVoiceModel
+import com.newoether.agora.data.repository.saveVoiceReferenceWavPath
+import com.newoether.agora.data.repository.upsertVoiceProfile
 import com.newoether.agora.data.VoiceSettings
 import com.newoether.agora.service.VoiceController
 import com.newoether.agora.ui.components.CircularBackButton

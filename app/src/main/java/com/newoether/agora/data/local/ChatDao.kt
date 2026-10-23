@@ -99,7 +99,6 @@ interface ChatDao :
     suspend fun upsertConversation(conversation: ChatEntity)
     @Query("UPDATE conversations SET modelId = :modelId, dataChangedAt = MAX(dataChangedAt + 1, :at) WHERE id = :conversationId")
     suspend fun updateConversationModel(conversationId: String, modelId: String?, at: Long): Int
-
     @Query("UPDATE conversations SET voiceProfileId = :voiceProfileId, dataChangedAt = MAX(dataChangedAt + 1, :at) WHERE id = :conversationId")
     suspend fun updateConversationVoiceProfile(conversationId: String, voiceProfileId: String?, at: Long): Int
     @Query("UPDATE conversations SET systemPromptId = :promptId, dataChangedAt = MAX(dataChangedAt + 1, :at) WHERE id = :conversationId")
