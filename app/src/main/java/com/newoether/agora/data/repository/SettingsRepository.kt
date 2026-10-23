@@ -25,8 +25,6 @@ import com.newoether.agora.data.LocalChatModelConfig
 import com.newoether.agora.data.PredefinedVariables
 import com.newoether.agora.data.PromptTemplateItem
 import com.newoether.agora.data.SettingsManager
-import com.newoether.agora.data.VoiceProfile
-import com.newoether.agora.data.VoiceSettings
 import com.newoether.agora.data.ShellDeviceConfig
 import com.newoether.agora.data.McpServerConfig
 import com.newoether.agora.data.SystemPromptEntry
@@ -253,17 +251,14 @@ class SettingsRepository(
     val autoDeletePeriodHours: StateFlow<Int> = hot(settingsManager.autoDeletePeriodHours, 168)
     val lastBackupTimestamp: StateFlow<Long> = hot(settingsManager.lastBackupTimestamp, 0L)
 
-    // ── Voice (TTS) — profiles + legacy single-endpoint surface ──
+    // ── Voice (TTS) ───────────────────────────────────────────
     val voiceEnabled: StateFlow<Boolean> = hot(settingsManager.voiceEnabled, false)
     val voiceAutoSpeak: StateFlow<Boolean> = hot(settingsManager.voiceAutoSpeak, false)
-    val voiceEndpointKind: StateFlow<String> = hot(settingsManager.voiceEndpointKind, VoiceSettings.ENDPOINT_KIND_MAGPIE)
-    val voiceEndpointUrl: StateFlow<String> = hot(settingsManager.voiceEndpointUrl, VoiceSettings.DEFAULT_MAGPIE_URL)
+    val voiceEndpointKind: StateFlow<String> = hot(settingsManager.voiceEndpointKind, com.newoether.agora.data.VoiceSettings.ENDPOINT_KIND_MAGPIE)
+    val voiceEndpointUrl: StateFlow<String> = hot(settingsManager.voiceEndpointUrl, com.newoether.agora.data.VoiceSettings.DEFAULT_MAGPIE_URL)
     val voiceApiKey: StateFlow<String> = hot(settingsManager.voiceApiKey, "")
     val voiceModel: StateFlow<String> = hot(settingsManager.voiceModel, "magpie-tts-zeroshot")
     val voiceReferenceWavPath: StateFlow<String> = hot(settingsManager.voiceReferenceWavPath, "")
-    val voiceProfiles: StateFlow<List<VoiceProfile>> = hot(settingsManager.voiceProfiles, emptyList())
-    val voiceActiveProfileId: StateFlow<String> = hot(settingsManager.voiceActiveProfileId, "")
-    val voiceActiveProfile: StateFlow<VoiceProfile?> = hot(settingsManager.voiceActiveProfile, null)
 
     // ── Write (fire-and-forget; read current state from own StateFlows) ──
     //
@@ -783,6 +778,13 @@ class SettingsRepository(
     suspend fun saveAutoDeleteEnabled(enabled: Boolean) = settingsManager.saveAutoDeleteEnabled(enabled)
     suspend fun saveAutoDeletePeriodHours(hours: Int) = settingsManager.saveAutoDeletePeriodHours(hours)
 
+    suspend fun saveVoiceEnabled(enabled: Boolean) = settingsManager.saveVoiceEnabled(enabled)
+    suspend fun saveVoiceAutoSpeak(enabled: Boolean) = settingsManager.saveVoiceAutoSpeak(enabled)
+    suspend fun saveVoiceEndpointKind(kind: String) = settingsManager.saveVoiceEndpointKind(kind)
+    suspend fun saveVoiceEndpointUrl(url: String) = settingsManager.saveVoiceEndpointUrl(url)
+    suspend fun saveVoiceApiKey(key: String) = settingsManager.saveVoiceApiKey(key)
+    suspend fun saveVoiceModel(model: String) = settingsManager.saveVoiceModel(model)
+    suspend fun saveVoiceReferenceWavPath(path: String) = settingsManager.saveVoiceReferenceWavPath(path)
 
     fun stableProviderReference(reference: String): String {
         val normalized = reference.trim()

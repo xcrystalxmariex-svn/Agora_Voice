@@ -161,7 +161,3 @@ internal val VOICE_ENDPOINT_URL = stringPreferencesKey("voice_endpoint_url")
 internal val VOICE_API_KEY = stringPreferencesKey("voice_api_key")
 internal val VOICE_MODEL = stringPreferencesKey("voice_model")
 internal val VOICE_REFERENCE_WAV_PATH = stringPreferencesKey("voice_reference_wav_path")
-/** JSON array of [VoiceProfile] (api keys stored encrypted inside each entry). */
-internal val VOICE_PROFILES_JSON = stringPreferencesKey("voice_profiles_json")
-/** Id of the global default [VoiceProfile]. Empty = first profile or none. */
-internal val VOICE_ACTIVE_PROFILE_ID = stringPreferencesKey("voice_active_profile_id")

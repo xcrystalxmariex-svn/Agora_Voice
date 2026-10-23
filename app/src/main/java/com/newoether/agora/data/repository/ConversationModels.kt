@@ -9,10 +9,3 @@ suspend fun ConversationRepository.replaceConfiguredModelReferences(oldModelId: 
 
 suspend fun ConversationRepository.renameConfiguredProviderModelReferences(oldProvider: String, newProvider: String) =
     chatDao.renameConfiguredProviderModelReferences(oldProvider, newProvider)
-
-suspend fun ConversationRepository.updateConversationVoiceProfile(
-    conversationId: String,
-    voiceProfileId: String?,
-): Boolean =
-    chatDao.updateConversationVoiceProfile(conversationId, voiceProfileId, System.currentTimeMillis()) == 1
-

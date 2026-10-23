@@ -39,7 +39,7 @@ interface ChatDao :
     ChatMediaReferencesDao,
     NewChatPersistDao {
     // Task executions always remain in their owning Task's History.
-    @Query("SELECT id, title, systemPromptId, modelId, taskId, origin, graduated, hasUnreadGeneration, isPinned, selectedBranchesJson, voiceProfileId FROM conversations WHERE taskId IS NULL ORDER BY lastUpdated DESC")
+    @Query("SELECT id, title, systemPromptId, modelId, taskId, origin, graduated, hasUnreadGeneration, isPinned, selectedBranchesJson FROM conversations WHERE taskId IS NULL ORDER BY lastUpdated DESC")
     fun getAllConversations(): Flow<List<ChatConversation>>
     @Query("SELECT id, title, hasUnreadGeneration, isPinned FROM conversations WHERE taskId IS NULL ORDER BY isPinned DESC, lastUpdated DESC, id LIMIT :limit")
     fun observeDrawerConversations(limit: Int): Flow<List<DrawerConversationRow>>
@@ -99,8 +99,6 @@ interface ChatDao :
     suspend fun upsertConversation(conversation: ChatEntity)
     @Query("UPDATE conversations SET modelId = :modelId, dataChangedAt = MAX(dataChangedAt + 1, :at) WHERE id = :conversationId")
     suspend fun updateConversationModel(conversationId: String, modelId: String?, at: Long): Int
-    @Query("UPDATE conversations SET voiceProfileId = :voiceProfileId, dataChangedAt = MAX(dataChangedAt + 1, :at) WHERE id = :conversationId")
-    suspend fun updateConversationVoiceProfile(conversationId: String, voiceProfileId: String?, at: Long): Int
     @Query("UPDATE conversations SET systemPromptId = :promptId, dataChangedAt = MAX(dataChangedAt + 1, :at) WHERE id = :conversationId")
     suspend fun updateConversationSystemPrompt(conversationId: String, promptId: String?, at: Long): Int
 

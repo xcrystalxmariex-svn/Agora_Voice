@@ -221,8 +221,6 @@ data class ChatConversation(
     val hasUnreadGeneration: Boolean = false,
     val isPinned: Boolean = false,
     val selectedBranchesJson: String? = null,
-    /** Per-chat voice profile override; null = use global default profile. */
-    val voiceProfileId: String? = null,
 )
 
 fun ChatMessage.isContextCompact(): Boolean =

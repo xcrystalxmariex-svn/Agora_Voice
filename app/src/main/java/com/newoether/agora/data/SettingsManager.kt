@@ -753,14 +753,6 @@ class SettingsManager(private val context: Context) {
     suspend fun saveVoiceModel(model: String) = voicePreferenceStore.saveVoiceModel(model)
     suspend fun saveVoiceReferenceWavPath(path: String) = voicePreferenceStore.saveVoiceReferenceWavPath(path)
 
-    val voiceProfiles = voicePreferenceStore.voiceProfiles
-    val voiceActiveProfileId = voicePreferenceStore.voiceActiveProfileId
-    val voiceActiveProfile = voicePreferenceStore.voiceActiveProfile
-    suspend fun saveVoiceProfiles(profiles: List<VoiceProfile>) = voicePreferenceStore.saveVoiceProfiles(profiles)
-    suspend fun upsertVoiceProfile(profile: VoiceProfile) = voicePreferenceStore.upsertVoiceProfile(profile)
-    suspend fun deleteVoiceProfile(id: String) = voicePreferenceStore.deleteVoiceProfile(id)
-    suspend fun saveVoiceActiveProfileId(id: String) = voicePreferenceStore.saveVoiceActiveProfileId(id)
-
 
     /**
      * Clears only settings that are portable across devices. Secrets, conversation-scoped
