@@ -435,11 +435,16 @@ read -rp "Enter destination path for the finished APK: " dest_path
 log "Running Gradle ($BUILD_TASK)..."
 cd "$WORK_DIR"
 BUILD_LOG=$(mktemp)
+echo -e "${CYAN}Live Gradle output below (also saved to:${RESET} ${GRAY}$BUILD_LOG${RESET}${CYAN})${RESET}"
+echo -e "${VIOLET}----------------------------------------------------------------${RESET}"
 
 set +e
-./gradlew "$BUILD_TASK" --stacktrace --no-daemon >"$BUILD_LOG" 2>&1
-GRADLE_RC=$?
+# Stream to terminal and log so long native/dependency phases never look frozen.
+./gradlew "$BUILD_TASK" --stacktrace --no-daemon --console=plain 2>&1 | tee "$BUILD_LOG"
+GRADLE_RC=${PIPESTATUS[0]}
 set -e
+
+echo -e "${VIOLET}----------------------------------------------------------------${RESET}"
 
 if [ "$GRADLE_RC" -eq 0 ]; then
     BUILT_APK=$(find_output_apk "$WORK_DIR" "$FLAVOR" "$BUILD_TYPE")
