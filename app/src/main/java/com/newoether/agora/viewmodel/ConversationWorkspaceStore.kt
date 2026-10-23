@@ -1,5 +1,6 @@
 package com.newoether.agora.viewmodel
 import com.newoether.agora.data.repository.updateConversationModel
+import com.newoether.agora.data.repository.updateConversationVoiceProfile
 
 import com.newoether.agora.data.ConversationSettings
 import com.newoether.agora.data.local.NewChatPersistEntity
@@ -173,6 +174,18 @@ internal class ConversationWorkspaceStore(
         } else {
             scope.launch(ioDispatcher) {
                 conversationMutationMutex.withLock { conversations.updateConversationModel(ownerId, modelId) }
+            }
+        }
+    }
+
+    fun setVoiceProfile(ownerId: String, voiceProfileId: String?) {
+        if (ownerId == NEW_CHAT_WORKSPACE_ID) {
+            // New chat uses global default until first message creates a conversation.
+            return
+        }
+        scope.launch(ioDispatcher) {
+            conversationMutationMutex.withLock {
+                conversations.updateConversationVoiceProfile(ownerId, voiceProfileId)
             }
         }
     }

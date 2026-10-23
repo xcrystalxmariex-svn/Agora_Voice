@@ -259,6 +259,11 @@ class SettingsRepository(
     val voiceApiKey: StateFlow<String> = hot(settingsManager.voiceApiKey, "")
     val voiceModel: StateFlow<String> = hot(settingsManager.voiceModel, "magpie-tts-zeroshot")
     val voiceReferenceWavPath: StateFlow<String> = hot(settingsManager.voiceReferenceWavPath, "")
+    val voiceProfiles: StateFlow<List<com.newoether.agora.data.VoiceProfile>> =
+        hot(settingsManager.voiceProfiles, emptyList())
+    val voiceActiveProfileId: StateFlow<String> = hot(settingsManager.voiceActiveProfileId, "")
+    val voiceActiveProfile: StateFlow<com.newoether.agora.data.VoiceProfile?> =
+        hot(settingsManager.voiceActiveProfile, null)
 
     // ── Write (fire-and-forget; read current state from own StateFlows) ──
     //
@@ -785,6 +790,12 @@ class SettingsRepository(
     suspend fun saveVoiceApiKey(key: String) = settingsManager.saveVoiceApiKey(key)
     suspend fun saveVoiceModel(model: String) = settingsManager.saveVoiceModel(model)
     suspend fun saveVoiceReferenceWavPath(path: String) = settingsManager.saveVoiceReferenceWavPath(path)
+    suspend fun saveVoiceProfiles(profiles: List<com.newoether.agora.data.VoiceProfile>) =
+        settingsManager.saveVoiceProfiles(profiles)
+    suspend fun upsertVoiceProfile(profile: com.newoether.agora.data.VoiceProfile) =
+        settingsManager.upsertVoiceProfile(profile)
+    suspend fun deleteVoiceProfile(id: String) = settingsManager.deleteVoiceProfile(id)
+    suspend fun saveVoiceActiveProfileId(id: String) = settingsManager.saveVoiceActiveProfileId(id)
 
     fun stableProviderReference(reference: String): String {
         val normalized = reference.trim()

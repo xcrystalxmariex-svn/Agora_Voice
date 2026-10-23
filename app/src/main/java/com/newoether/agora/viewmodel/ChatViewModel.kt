@@ -245,6 +245,13 @@ class ChatViewModel(
      *  ChatApp wires this to trigger a single haptics.confirm() for all three paths. */
     @Volatile var onSendAccepted: ((conversationId: String, messageId: String) -> Unit)? = null
 
+    val currentVoiceProfileId: String?
+        get() = currentConversation.value?.voiceProfileId
+
+    fun setVoiceProfile(conversationId: String, voiceProfileId: String?) {
+        conversationWorkspaces.setVoiceProfile(conversationId, voiceProfileId)
+    }
+
     val currentActiveModel: StateFlow<String> get() = selectionController.currentActiveModel
 
     fun getProviderForModel(modelId: String): String = providerRegistry.providerForModel(modelId)
@@ -676,3 +683,4 @@ class ChatViewModel(
     fun fetchAvailableModels() = providerModelSyncUi.fetchAvailableModels()
 
 }
+

@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.newoether.agora.R
+import com.newoether.agora.data.VoiceProfile
 import com.newoether.agora.data.VoiceSettings
 import com.newoether.agora.service.VoiceController
 import com.newoether.agora.ui.components.CircularBackButton
@@ -72,6 +75,8 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
     val apiKey by settings.voiceApiKey.collectAsState(initial = "")
     val model by settings.voiceModel.collectAsState(initial = "magpie-tts-zeroshot")
     val referencePath by settings.voiceReferenceWavPath.collectAsState(initial = "")
+    val profiles by settings.voiceProfiles.collectAsState(initial = emptyList())
+    val activeProfileId by settings.voiceActiveProfileId.collectAsState(initial = "")
 
     val isSpeaking by controller.isSpeaking.collectAsState()
     val lastError by controller.lastError.collectAsState()
@@ -130,7 +135,81 @@ fun SettingsVoicePage(viewModel: ChatViewModel, onBack: () -> Unit) {
             ),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            item {
+            
+                item {
+                    Text(
+                        stringResource(R.string.voice_profiles),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    profiles.forEach { profile ->
+                        Row(
+                            Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            FilterChip(
+                                selected = profile.id == activeProfileId,
+                                onClick = {
+                                    scope.launch { settings.saveVoiceActiveProfileId(profile.id) }
+                                },
+                                label = {
+                                    Text(
+                                        profile.name.ifBlank { stringResource(R.string.voice_profile_default) }
+                                    )
+                                },
+                            )
+                            Spacer(Modifier.weight(1f))
+                            if (profile.id == activeProfileId) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    contentDescription = stringResource(R.string.voice_profile_set_default),
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                            if (profiles.size > 1) {
+                                IconButton(onClick = {
+                                    scope.launch { settings.deleteVoiceProfile(profile.id) }
+                                }) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.voice_profile_delete),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val n = profiles.size + 1
+                                settings.upsertVoiceProfile(
+                                    VoiceProfile(name = "Profile $n")
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.voice_profile_add))
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        stringResource(R.string.voice_endpoint_group),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "Editing the active profile. Switch profiles above to edit another.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+
+item {
                 SettingsGroup(
                     title = stringResource(R.string.settings_voice),
                     items = listOf(

@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.newoether.agora.R
 import com.newoether.agora.service.VoiceController
+import com.newoether.agora.service.VoiceProfileResolver
 import com.newoether.agora.viewmodel.ChatViewModel
 import com.newoether.agora.data.forDisplay
 import com.newoether.agora.model.Participant
@@ -45,7 +46,22 @@ fun AssistantSpeakAction(
     val playingThis = playingId == messageId
     IconButton(
         onClick = {
-            if (playingThis) controller.stop() else controller.speak(messageId, text)
+            if (playingThis) {
+                controller.stop()
+            } else {
+                val profiles = viewModel.settings.voiceProfiles.value
+                val activeId = viewModel.settings.voiceActiveProfileId.value
+                val chatProfileId = viewModel.currentVoiceProfileId
+                VoiceProfileResolver.applyToController(
+                    controller,
+                    profiles,
+                    activeId,
+                    chatProfileId,
+                    enabled,
+                    viewModel.settings.voiceAutoSpeak.value,
+                )
+                controller.speak(messageId, text)
+            }
         },
         modifier = modifier.size(32.dp),
     ) {

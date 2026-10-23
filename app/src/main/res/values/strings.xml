@@ -825,4 +825,12 @@
     <string name="voice_test_ok">Test complete</string>
     <string name="voice_speak">Speak message</string>
     <string name="voice_stop">Stop speaking</string>
+    <string name="voice_profiles">Saved voice profiles</string>
+    <string name="voice_profile_add">Add profile</string>
+    <string name="voice_profile_default">Default</string>
+    <string name="voice_profile_name">Profile name</string>
+    <string name="voice_profile_delete">Delete profile</string>
+    <string name="voice_profile_set_default">Set as default</string>
+    <string name="voice_profile_chat_select">Voice profile</string>
+    <string name="voice_profile_use_default">Use default</string>
 </resources>
